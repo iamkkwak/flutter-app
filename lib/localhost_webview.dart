@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/write_review_page.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'dart:html' as html;
 
 class LocalhostWebView extends StatefulWidget {
   const LocalhostWebView({super.key});
@@ -13,6 +15,30 @@ class LocalhostWebView extends StatefulWidget {
 
 class _LocalhostWebViewState extends State<LocalhostWebView> {
   late InAppWebViewController _webViewController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (kIsWeb) {
+      html.window.onMessage.listen((event) {
+        final data = event.data;
+
+        if (data is Map && data['type'] == 'openWriteReviewPage') {
+          if (!mounted) {
+            return;
+          }
+
+          Future.microtask(() {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const WriteReviewPage()),
+            );
+          });
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +58,6 @@ class _LocalhostWebViewState extends State<LocalhostWebView> {
         onReceivedError: (controller, request, error) {
           debugPrint('Error: ${error.description}');
         },
-        // JavaScript 핸들러 등록
         onLoadStart: (controller, url) {
           controller.addJavaScriptHandler(
             handlerName: 'openWriteReviewPage',

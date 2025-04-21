@@ -97,7 +97,6 @@ class _WriteReviewPageState extends State<WriteReviewPage> {
       await Supabase.instance.client.from('reviews').insert({
         'rating': _rating,
         'review': reviewText,
-        'created_at': DateTime.now().toIso8601String(),
       });
 
       // 업로드 성공 시 창 닫기
